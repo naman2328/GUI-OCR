@@ -1,16 +1,17 @@
-# filename: continuous_roi_ocr_gui.py
+# filename: main.py
 import sys
 import cv2
 import os
 import json
 import time
-from PySide6.QtWidgets import (
+from PyQt5.QtWidgets import (
     QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout,
     QComboBox, QStackedWidget, QTextEdit, QFileDialog, QListWidget,
     QListWidgetItem, QInputDialog, QMessageBox
 )
-from PySide6.QtGui import QImage, QPixmap, QFont, QMouseEvent
-from PySide6.QtCore import Qt, QThread, Signal, QTimer
+from PyQt5.QtGui import QImage, QPixmap, QFont, QMouseEvent
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
+
 from engine_core import Engine
 import logging
 from logging.handlers import RotatingFileHandler
@@ -48,7 +49,7 @@ logger.addHandler(_handler)
 
 # -------- Helper: Worker thread for OCR so UI doesn't block ----------
 class OCRWorker(QThread):
-    finished = Signal(dict)  # emits the engine result dict
+    finished = pyqtSignal(dict)  # emits the engine result dict
 
     def __init__(self, engine, frame):
         super().__init__()
@@ -74,9 +75,9 @@ class OCRWorker(QThread):
 
 # -------- Custom QLabel to capture mouse events over video widget ----------
 class VideoLabel(QLabel):
-    mousePressed = Signal(object)   # emits QPoint
-    mouseMoved = Signal(object)     # emits QPoint
-    mouseReleased = Signal(object)  # emits QPoint
+    mousePressed = pyqtSignal(object)
+    mouseMoved = pyqtSignal(object)
+    mouseReleased = pyqtSignal(object)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -96,8 +97,7 @@ class VideoLabel(QLabel):
 
 # ---------- Camera Thread ----------
 class CameraThread(QThread):
-    frameCaptured = Signal(object)
-
+    frameCaptured = pyqtSignal(object)
     def __init__(self, cam_id=0, width=1024, height=720):
         super().__init__()
         self.cam_id = cam_id
