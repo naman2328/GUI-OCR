@@ -1,0 +1,163 @@
+import cv2
+import os
+import numpy as np
+import time
+from paddleocr import PaddleOCR
+from pyzbar.pyzbar import decode as decode_barcode
+from pylibdmtx.pylibdmtx import decode as decode_datamatrix
+from difflib import SequenceMatcher
+from datetime import datetime
+
+
+class Engine:
+    def __init__(
+        self,
+        use_gpu=True,
+        enable_barcode=False,
+        enable_datamatrix=False,
+        debug=False,
+        font_path="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    ):
+        """
+        debug = False  → PRODUCTION MODE (FAST)
+        debug = True   → DEBUG MODE (draw boxes, save images)
+        """
+
+        self.debug = debug
+        self.enable_barcode = enable_barcode
+        self.enable_datamatrix = enable_datamatrix
+        self.font_path = font_path
+
+        # ---- OCR ENGINE ----
+        self.ocr = PaddleOCR(
+            lang="en",
+            use_angle_cls=False,          # 🔥 disabled (big speed win)
+            det_db_box_thresh=0.6,
+            det_db_unclip_ratio=1.7,
+            use_space_char=True,
+            use_gpu=use_gpu,
+            show_log=False
+        )
+
+        # ---- STORAGE (debug only) ----
+        self.temp_dir = "ocr_temp"
+        if self.debug:
+            os.makedirs(self.temp_dir, exist_ok=True)
+
+        # ---- EXPECTED TEXTS ----
+        self.expected_entries = []  # populate externally
+
+
+    # ------------------------------------------------------------------
+    # Utility functions
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _normalize(text: str) -> str:
+        return text.lower().replace(" ", "").replace(",", "").replace(".", "")
+
+    def _is_match(self, expected, detected_list, threshold=0.95):
+        exp_norm = self._normalize(expected)
+        for det in detected_list:
+            if SequenceMatcher(None, exp_norm, self._normalize(det)).ratio() >= threshold:
+                return True
+        return False
+
+
+    # ------------------------------------------------------------------
+    # MAIN OCR CYCLE (TRIGGER-BASED)
+    # ------------------------------------------------------------------
+
+    def run_cycle(self, frame, roi=None):
+        """
+        frame : BGR numpy image
+        roi   : (x1, y1, x2, y2) or None
+        """
+
+        start_time = time.time()
+
+        # -------------------------------
+        # 1. ROI crop FIRST (CRITICAL)
+        # -------------------------------
+        if roi is not None:
+            x1, y1, x2, y2 = roi
+            frame = frame[y1:y2, x1:x2]
+
+        # -------------------------------
+        # 2. OCR (NO DRAWING)
+        # -------------------------------
+        result = self.ocr.ocr(frame, cls=False)
+
+        texts = []
+        scores = []
+
+        if result:
+            for line in result:
+                for word in line:
+                    text = word[1][0]
+                    conf = word[1][1]
+                    texts.append(text)
+                    scores.append(conf)
+
+        all_detected = list(texts)
+
+        # -------------------------------
+        # 3. OPTIONAL barcode decoding
+        # -------------------------------
+        if self.enable_barcode:
+            for b in decode_barcode(frame):
+                all_detected.append(b.data.decode("utf-8"))
+
+        if self.enable_datamatrix:
+            for d in decode_datamatrix(frame):
+                all_detected.append(d.data.decode("utf-8"))
+
+        # -------------------------------
+        # 4. Matching logic
+        # -------------------------------
+        matched = []
+        not_matched = []
+
+        for exp in self.expected_entries:
+            if self._is_match(exp, all_detected):
+                matched.append(exp)
+            else:
+                not_matched.append(exp)
+
+        status = "OK" if not not_matched else "NG"
+
+        # -------------------------------
+        # 5. Timing
+        # -------------------------------
+        time_taken = time.time() - start_time
+        avg_conf = float(np.mean(scores)) if scores else 0.0
+
+        # -------------------------------
+        # 6. DEBUG MODE (OPTIONAL)
+        # -------------------------------
+        out_path = ""
+
+        if self.debug:
+            dbg = frame.copy()
+            color = (0, 255, 0) if status == "OK" else (0, 0, 255)
+            cv2.putText(dbg, f"STATUS: {status}", (10, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+            cv2.putText(dbg, f"Time: {time_taken:.2f}s", (10, 70),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
+
+            ts = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+            out_path = os.path.join(self.temp_dir, f"ocr_{ts}.png")
+            cv2.imwrite(out_path, dbg)
+
+        # -------------------------------
+        # 7. Return result (LEAN)
+        # -------------------------------
+        return {
+            "status": status,
+            "matched": matched,
+            "not_matched": not_matched,
+            "detected": all_detected,
+            "conf": avg_conf,
+            "time_taken": time_taken,
+            "path": out_path
+        }
