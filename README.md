@@ -1,6 +1,6 @@
 
 
-# 🚀 Custom Offline OCR System 
+# 🚀 INBD OCR System 
 
 ## 📌 Overview
 
@@ -90,6 +90,10 @@ The OCR pipeline is divided into **three core stages**:
 ---
 
 ## 📦 Installation
+
+1️⃣ Clone the Repository
+[git clone (https://github.com/naman2328/GUI-OCR.git)
+cd GUI-OCR
 
 ```bash
 pip install -r requirements.txt
