@@ -1,6 +1,6 @@
 
 
-# 🚀 INBD OCR System 
+# 🚀  OCR System 
 
 ## 📌 Overview
 
