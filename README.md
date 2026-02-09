@@ -129,14 +129,6 @@ python inference/run_ocr.py --image sample.jpg
 
 ---
 
-## 📌 Notes
-
-* All models, logic, and pipelines are **originally implemented**
-* No third-party OCR engines are used
-* Designed for **extensibility and auditability**
-
----
-
 ## 👤 Author
 
 **Naman Sharma**
