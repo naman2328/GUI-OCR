@@ -127,4 +127,6 @@ Built at **Autoliv India** as part of a computer vision and AI-focused internshi
 
 **Naman Sharma**
 Mechatronics Engineer | Computer Vision | ROS 2 | Edge AI
-[GitHub](https://github.com/naman2328) · [LinkedIn](https://linkedin.com/in/YOUR_LINKEDIN)
+[GitHub](https://github.com/naman2328) · [LinkedIn](www.linkedin.com/in/
+namansharma4015
+)
