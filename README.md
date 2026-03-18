@@ -1,138 +1,130 @@
-
-
-# 🚀  OCR System 
-
-## 📌 Overview
-
-This project is a **fully custom-built Offline Optical Character Recognition (OCR) system**, developed  with using existing OCR engines (e.g., PaddleOCR).
-It is designed for **industrial inspection and validation use cases**, where **accuracy, compliance, and offline execution** are critical.
-
-The system performs:
-
-* Text **detection**
-* Text **recognition** using a custom CRNN + CTC pipeline
-* **Bounding box visualization**
-* **Strict field-level validation (OK / NG)**
-* Fully **offline deployment**
+# OCR Inspection System | Autoliv India Internship
 
 ---
 
-## 🎯 Key Objectives
+## Overview
 
-* ✅ High accuracy with punctuation preservation
-* ✅ Offline & edge-device compatible (Jetson / x86)
----
+An offline OCR-based quality inspection system built during my internship at **Autoliv India (PED Department)**. Designed for manufacturing shop-floor deployment — no internet connection required.
 
-## 🧠 System Architecture
-
-The OCR pipeline is divided into **three core stages**:
-
-1. **Text Detection**
-
-   * Detects text regions from input images
-   * Outputs bounding boxes for each text line/word
-
-2. **Text Recognition**
-
-   * Custom CRNN (CNN + RNN) model
-   * CTC loss for sequence prediction
-   * Character-level decoding
-
-3. **Validation & Visualization**
-
-   * Field-wise rule checking (regex / length / format)
-   * OK / NG status overlay on image
-   * Bounding box + recognized text visualization
+The system reads text from industrial part labels, validates recognized content against expected values, and provides a real-time OK / NG decision through a shop-floor GUI.
 
 ---
 
+## What It Does
 
-
-## ⚙️ Tech Stack
-
-* **Language:** Python
-* **Framework:** PyTorch
-* **Image Processing:** OpenCV, NumPy
-* **Model Type:** CRNN (CNN + RNN + CTC),Paddleocr 2.6.1.3
-* **Deployment:** Offline (Jetson / Linux / Windows)
+- Detects and reads text from industrial part labels and markings
+- Validates recognized text against configurable field rules (regex, length, format)
+- Displays bounding boxes and recognized text in real-time
+- Renders clear OK / NG status overlay for operator use
+- Fully offline — no cloud dependency, deployable on Jetson or standard hardware
 
 ---
 
-## 🏋️ Training Pipeline
+## System Architecture
 
-* Image normalization & augmentation
-* Sequence labeling
-* CTC loss–based training
-* Character dictionary defined manually
-* Checkpoint-based training & recovery
-
----
-
-## 🔍 Inference Flow
-
-1. Load input image
-2. Detect text regions
-3. Crop & preprocess regions
-4. Run CRNN recognition
-5. Decode sequence output
-6. Validate fields
-7. Display OK / NG with bounding boxes
-
----
-
-## 🖥️ Offline GUI Validator
-
-* Displays detected bounding boxes
-* Shows recognized text per region
-* Real-time **OK / NG** decision on image
-* Designed for **shop-floor / inspection usage**
+```
+Input Image
+     │
+     ▼
+Text Detection (PaddleOCR)
+     │  Bounding boxes per text region
+     ▼
+Text Recognition (PaddleOCR)
+     │  Raw recognized strings
+     ▼
+Field Validation (Custom Logic)
+     │  Regex / format / length rules per field
+     ▼
+OK / NG Decision
+     │
+     ▼
+GUI Overlay (OpenCV)
+     Bounding boxes + recognized text + status
+```
 
 ---
 
-## 📦 Installation
+## What I Built
 
-1️⃣ Clone the Repository
-[git clone (https://github.com/naman2328/GUI-OCR.git)
-cd GUI-OCR
+PaddleOCR 2.6.1.3 is used as the core detection and recognition engine.
+
+**Custom components built on top:**
+
+- **Field Validation Logic** — configurable per-field rules using regex and format matching to produce OK / NG decisions
+- **OK / NG Overlay** — visual status rendering on the original image for each detected field
+- **Shop-Floor GUI** — operator-facing interface displaying bounding boxes, recognized text, and validation results in real time
+- **Offline Deployment Configuration** — packaged for edge deployment on Jetson and standard Linux/Windows environments without internet dependency
+
+---
+
+## Engineering Note
+
+Evaluated multiple OCR approaches before selecting PaddleOCR 2.6.1.3 as the recognition backbone based on its reliability and accuracy on industrial label data. Engineering effort was focused on the validation logic, GUI, and deployment pipeline — where the actual business value for the inspection use case was.
+
+---
+
+## Tech Stack
+
+| Component | Technology |
+|---|---|
+| Language | Python 3.8+ |
+| OCR Engine | PaddleOCR 2.6.1.3 |
+| Image Processing | OpenCV, NumPy |
+| GUI | OpenCV / Tkinter |
+| Deployment Target | Offline — Jetson / Linux / Windows |
+
+
+---
+
+## Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/naman2328/GUI-OCR.git
+cd GUI-OCR
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-> ⚠️ This project is intended to run **offline**.
-> No internet or cloud dependencies are required.
+> ⚠️ This system is designed for offline use. No internet connection required at runtime.
 
 ---
 
-## ▶️ Run Inference
+## Usage
 
 ```bash
-python inference/run_ocr.py --image sample.jpg
+python main.py --image sample.jpg
 ```
 
 ---
 
-## 📊 Output Example
+## Output
 
-
-* Recognized text overlay
-* Validation status (OK / NG)
-
----
-
-## 🧩 Use Cases
-
-* Industrial part marking verification
-* Serial number & label validation
-* Manufacturing quality inspection
-* Offline OCR for compliance-sensitive environments
+- Detected text regions with bounding boxes
+- Recognized text displayed per region
+- OK / NG validation status overlaid on image
+- Console log of all field validation results
 
 ---
 
-## 👤 Author
+## Use Cases
+
+- Industrial part marking verification
+- Serial number and label validation
+- Manufacturing quality inspection
+- Offline OCR for compliance-sensitive environments
+
+---
+
+## Context
+
+Built at **Autoliv India** as part of a computer vision and AI-focused internship in the PED (Product Engineering Department). The goal was to reduce manual inspection effort on the production line through automated text verification.
+
+---
+
+## Author
 
 **Naman Sharma**
-Mechatronics Engineer
-Focus: Robotics, Computer Vision
-
----
+Mechatronics Engineer | Computer Vision | ROS 2 | Edge AI
+[GitHub](https://github.com/naman2328) · [LinkedIn](https://linkedin.com/in/YOUR_LINKEDIN)
