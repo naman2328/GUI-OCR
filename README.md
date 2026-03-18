@@ -4,7 +4,7 @@
 
 ## 📌 Overview
 
-This project is a **fully custom-built Offline Optical Character Recognition (OCR) system**, developed **from scratch** without using existing OCR engines (e.g., PaddleOCR).
+This project is a **fully custom-built Offline Optical Character Recognition (OCR) system**, developed  with using existing OCR engines (e.g., PaddleOCR).
 It is designed for **industrial inspection and validation use cases**, where **accuracy, compliance, and offline execution** are critical.
 
 The system performs:
